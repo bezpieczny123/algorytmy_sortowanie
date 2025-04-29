@@ -44,6 +44,7 @@ void quickSort(T* arr, int size) {
         } else if (arr[j] > pivot) {
             std::swap(arr[j], arr[k]);
             k--;
+            j++;
         } else {
             j++;
         }

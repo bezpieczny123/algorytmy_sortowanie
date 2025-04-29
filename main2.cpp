@@ -41,9 +41,9 @@ int main() {
 
     using SortFunction = void (*)(int[], int);
     std::vector<std::pair<std::string, SortFunction>> algorithms = {
-        {"IntroSort", introsort<int>},
         {"QuickSort", quickSort<int>},
-        {"MergeSort", mergeSort<int>}
+        {"MergeSort", mergeSort<int>},
+        {"IntroSort", introsort<int>}
     };
 
     for (const auto &algorithm : algorithms) {

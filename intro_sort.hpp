@@ -19,19 +19,22 @@ void insertion_sort(T arr[], int begin, int end) {
 
 template <typename T>
 void heapify(T arr[], int begin, int end, int i) {
-    int largest = i;
-    int left = 2 * (i - begin) + 1 + begin;
-    int right = 2 * (i - begin) + 2 + begin;
+    while (true) {
+        int largest = i;
+        int left = 2 * (i - begin) + 1 + begin;
+        int right = 2 * (i - begin) + 2 + begin;
 
-    if (left < end && arr[left] > arr[largest]) {
-        largest = left;
-    }
-    if (right < end && arr[right] > arr[largest]) {
-        largest = right;
-    }
-    if (largest != i) {
+        if (left < end && arr[left] > arr[largest]) {
+            largest = left;
+        }
+        if (right < end && arr[right] > arr[largest]) {
+            largest = right;
+        }
+        if (largest == i) {
+            break;
+        }
         std::swap(arr[i], arr[largest]);
-        heapify(arr, begin, end, largest);
+        i = largest;
     }
 }
 
@@ -80,15 +83,16 @@ void quicksort(T arr[], int begin, int end, int depth_limit, int current_depth) 
         }
 
         int pivot = partition(arr, begin, end);
-        ++current_depth;
+        int next_depth = current_depth + 1;
 
-        // recurse on smaller side
         if (pivot - begin < end - pivot - 1) {
-            quicksort(arr, begin, pivot, depth_limit, current_depth);
-            begin = pivot + 1;   // tail-call on larger side
+            quicksort(arr, begin, pivot, depth_limit, next_depth);
+            begin = pivot + 1;
+            current_depth = next_depth;
         } else {
-            quicksort(arr, pivot + 1, end, depth_limit, current_depth);
-            end = pivot;         // tail-call on larger side
+            quicksort(arr, pivot + 1, end, depth_limit, next_depth);
+            end = pivot;
+            current_depth = next_depth;
         }
     }
 }
