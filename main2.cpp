@@ -1,10 +1,9 @@
 #include <chrono>
 #include <random>
 #include <fstream>
-
 #include "quick_sort.hpp"
 #include "merge_sort.hpp"
-#include "shell_sort.hpp"
+#include "intro_sort.hpp"
 
 const int NUM_REPETITIONS = 100;
 const std::vector<int> SIZES = {100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000};
@@ -39,16 +38,20 @@ int main() {
         std::cerr << "Blad: Nie mozna otworzyc pliku do zapisu: " << OUTPUT_FILENAME << std::endl;
         return 1;
     }
+
     using SortFunction = void (*)(int[], int);
     std::vector<std::pair<std::string, SortFunction>> algorithms = {
-        {"ShellSort", shellSort<int>},
+        {"IntroSort", introsort<int>},
         {"QuickSort", quickSort<int>},
         {"MergeSort", mergeSort<int>}
     };
+
     for (const auto &algorithm : algorithms) {
         const auto& algName = algorithm.first;
         SortFunction sortFunc = algorithm.second;
-        for (auto size : SIZES) {
+
+        // Test random arrays
+        for (int size : SIZES) {
             long long total_time = 0;
             for (int rep = 0; rep < NUM_REPETITIONS; rep++) {
                 int* data = new int[size];
@@ -57,43 +60,50 @@ int main() {
                 sortFunc(data, size);
                 auto end = std::chrono::high_resolution_clock::now();
                 total_time += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-                std::cout << algName << " Random " << size << " " << rep << " " << total_time << std::endl;
                 delete[] data;
             }
-            double avg_time = static_cast<double>(total_time) / NUM_REPETITIONS;
+            int avg_time = static_cast<int>(total_time) / NUM_REPETITIONS;
+            std::cout << algName << " " << size << std::endl;
             resultsFile << algName << "," << size << "," << "Random," << avg_time << std::endl;
-            total_time = 0;
+        }
 
+        // Test reversed arrays
+        for (int size : SIZES) {
+            long long total_time = 0;
             for (int rep = 0; rep < NUM_REPETITIONS; rep++) {
                 int* data = new int[size];
                 generateReversed(data, size);
                 auto start = std::chrono::high_resolution_clock::now();
-                quickSort(data, size);
+                sortFunc(data, size);
                 auto end = std::chrono::high_resolution_clock::now();
                 total_time += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-                std::cout << algName << " Partial " << size << " " << rep << " " << total_time << std::endl;
                 delete[] data;
             }
-            avg_time = static_cast<double>(total_time) / NUM_REPETITIONS;
+            int avg_time = static_cast<int>(total_time) / NUM_REPETITIONS;
+            std::cout << algName << " " << size << std::endl;
             resultsFile << algName << "," << size << "," << "Reversed," << avg_time << std::endl;
-            total_time = 0;
+        }
 
-            for (auto perc : SORTED_PERCENTAGES) {
+        // Test partially sorted arrays for each percentage
+        for (double perc : SORTED_PERCENTAGES) {
+            for (int size : SIZES) {
+                long long total_time = 0;
                 for (int rep = 0; rep < NUM_REPETITIONS; rep++) {
                     int* data = new int[size];
                     generatePartiallySorted(data, size, perc);
                     auto start = std::chrono::high_resolution_clock::now();
-                    quickSort(data, size);
+                    sortFunc(data, size);
                     auto end = std::chrono::high_resolution_clock::now();
                     total_time += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-                    std::cout << algName << " " << perc << " " << size << " " << rep << " " << total_time << std::endl;
                     delete[] data;
                 }
-                avg_time = static_cast<double>(total_time) / NUM_REPETITIONS;
-                resultsFile << algName << "," << size << ","  << perc << "," << avg_time << std::endl;
-                total_time = 0;
+                int avg_time = static_cast<int>(total_time) / NUM_REPETITIONS;
+                std::cout << algName << " " << size << std::endl;
+                resultsFile << algName << "," << size << "," << perc << "," << avg_time << std::endl;
             }
         }
     }
-    return EXIT_SUCCESS;
+
+    resultsFile.close();
+    return 0;
 }
